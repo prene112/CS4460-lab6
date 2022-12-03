@@ -2,7 +2,7 @@
 var width = 500;
 var height = 500;
 
-d3.csv("cereals.csv", function (csv) {
+d3.csv("videogamesales.csv", function (csv) {
   for (var i = 0; i < csv.length; ++i) {
     csv[i].Calories = Number(csv[i].Calories)
     csv[i].Fat = Number(csv[i].Fat);
