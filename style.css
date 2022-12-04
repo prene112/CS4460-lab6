@@ -20,7 +20,8 @@ path.domain {
 }
 
 #wrapper {
-	clear:both;
+
+	display: flex;
 }
 #chart1 {
   float:left;
