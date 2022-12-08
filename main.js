@@ -1,6 +1,9 @@
 
-var width = 500;
-var height = 500;
+var width = 600;
+var height = 600;
+
+var rangeX = [50, 470]
+var rangeY = [470, 30]
 
 d3.csv("videogamesales.csv", function (csv) {
   for (var i = 0; i < csv.length; ++i) {
@@ -17,7 +20,17 @@ d3.csv("videogamesales.csv", function (csv) {
   let platformExtent = [];
   let genreExtent = [];
   let publishersExtent = [];
+  let yearExtent = [];
+  let yearsData = [];
 
+  var currYear = 1981;
+  for (var i = 0; i < 8; i++) {
+    var currData = {}
+    currData.column = currYear + " - " + (currYear+4);
+    currData.value = 0;
+    yearsData.push(currData);
+  }
+  
   csv.forEach((row) => {
     if(platformExtent.indexOf(row.Platform) === -1) {
       platformExtent.push(row.Platform);
@@ -33,6 +46,12 @@ d3.csv("videogamesales.csv", function (csv) {
       publishersExtent.push(row.Publisher);
     }
   });
+  csv.forEach((row) => {
+    if(yearExtent.indexOf(row.Year) === -1) {
+      yearExtent.push(row.Year);
+    }
+  });
+  console.log(yearExtent);
 
   var naExtent = d3.extent(csv, function (row) {
     return row.NA_Sales;
@@ -48,23 +67,10 @@ d3.csv("videogamesales.csv", function (csv) {
   });
 
 
+  
+
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
-  // Axis setup
-  var xScale = d3.scaleLinear().domain(platformExtent).range([50, 470]);
-  var yScale = d3.scaleLinear().domain(naExtent).range([470, 30]);
-
-  console.log(naExtent);
-
-  // var xScale2 = d3.scaleLinear().domain(fiberExtent).range([50, 470]);
-  // var yScale2 = d3.scaleLinear().domain(proteinExtent).range([470, 30]);
-
-  var xAxis = d3.axisBottom().scale(xScale);
-  console.log(xScale(0));
-  var yAxis = d3.axisLeft().scale(yScale);
-
-  // var xAxis2 = d3.axisBottom().scale(xScale2);
-  // var yAxis2 = d3.axisLeft().scale(yScale2);
 
   //Legend
   //Hint: Append circrcles to each selection to represent the calorie level
@@ -207,25 +213,138 @@ d3.csv("videogamesales.csv", function (csv) {
   //   })
   //   .attr("cy", function(d){return yScale2(d.Protein)});
   
-  chart1 // or something else that selects the SVG element in your visualizations
-    .append("g") // create a group node
-    .attr("transform", "translate(0," + (width - 30) + ")")
-    .call(xAxis) // call the axis generator
-    .append("text")
-    .attr("class", "label")
-    .attr("x", width - 16)
-    .attr("y", -6)
-    .style("text-anchor", "end");
+  // chart1 // or something else that selects the SVG element in your visualizations
+  //   .append("g") // create a group node
+  //   .attr("transform", "translate(0," + (width - 30) + ")")
+  //   .call(xAxis) // call the axis generator
+  //   .append("text")
+  //   .attr("class", "label")
+  //   .attr("x", width - 16)
+  //   .attr("y", -6)
+  //   .style("text-anchor", "end");
 
-  chart1 // or something else that selects the SVG element in your visualizations
-    .append("g") // create a group node
-    .attr("transform", "translate(50, 0)")
-    .call(yAxis)
-    .append("text")
-    .attr("transform", "rotate(-90)")
-    .attr("y", 6)
-    .attr("dy", ".71em")
-    .style("text-anchor", "end");
+  function updateAxes(newData) {
+    var extent = d3.extent(newData, (row)=> {
+      return row.value;
+    })
+    // Axis setup
+    //var xScale = d3.scaleLinear().domain(platformExtent).range(rangeX);
+    var yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
+
+    console.log(extent);
+
+    // var xScale2 = d3.scaleLinear().domain(fiberExtent).range([50, 470]);
+    // var yScale2 = d3.scaleLinear().domain(proteinExtent).range([470, 30]);
+
+    //var xAxis = d3.axisBottom().scale(xScale);
+    var yAxis = d3.axisLeft().scale(yScale);
+
+    // var xAxis2 = d3.axisBottom().scale(xScale2);
+    // var yAxis2 = d3.axisLeft().scale(yScale2);
+    chart1 // or something else that selects the SVG element in your visualizations
+      .append("g") // create a group node
+      .attr("transform", "translate(50, 0)")
+      .call(yAxis)
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end");
+
+    return extent;
+  };
+
+  function onXCategoryChanged() {
+    var select = d3.select('#xCategorySelect').node();
+    var xVal = select.options[select.selectedIndex].value;
+    // Update chart with the selected category of cereal
+    var inputExtent;
+    if (category == "Platform") {
+      inputExtent = platformExtent;
+    } else if (category == "Publisher") {
+      inputExtent = publisherExtent;
+    } else if (category == "Year") {
+      inputExtent = yearExtent;
+    } else {
+      inputExtent = genreExtent;
+    }
+    updateChart(organizeData(inputExtent, xVal, "NA_Sales"));
+  }
+
+  var platformData = organizeData(platformExtent, "Platform", "NA_Sales");
+  updateChart(platformData);
+  // var genreData = organizeData(genreExtent, "Genre");
+  // var publisherData = organizeData(publishersExtent, "Publisher");
+
+  function updateChart(newData) {
+    var actualHeight = rangeY[0]-rangeY[1]
+    var actualWidth = rangeX[1]-rangeX[0]
+    var extent = updateAxes(newData);
+
+    var newTitle = chart1.selectAll('.gClass').data(newData, function(d){
+      return d.column;
+    });
+
+    var selection = newTitle.enter()
+        .append('g')
+        .attr('class', 'gClass');
+        
+    selection.merge(newTitle).attr('transform', function(d, index){
+        return "translate(" + (index* (actualWidth/newData.length) + 50)+ "," + (rangeY[0] - (d.value* (actualHeight/extent[1]))) + ")";
+    });
+    
+    
+    selection.append('rect')
+        .attr('height', function (d) { return d.value* (actualHeight/extent[1]) })
+        .attr('width', function(){return actualHeight/newData.length - 10})
+        .attr('class', 'bar');
+    
+    selection.append('text')
+      .attr('text-anchor', 'end')
+      .attr('transform',  function(d){return "translate(15," + ((d.value* (440/extent[1])) + 10) + ")"+"rotate(-45)"})
+      .text(function(d){
+          return d.column;
+      });
+
+    newTitle.exit().remove();
+  }
+
+  // Returns columns with corresponding datapoints
+  function organizeData(columnName, xVariable, yVariable) {
+    var map = new Map();
+    var newData = []
+    columnName.forEach((column)=> {
+      map.set(column, 0);
+    })
+    csv.forEach((row)=> {
+      map.set(row[xVariable], map.get(row[xVariable]) + row[yVariable]);
+    }) 
+    const obj = Object.fromEntries(map);
+    var arr = Object.entries(obj);
+    console.log(map)
+    for(var i = 0; i < arr.length; i++) {
+      var currData = {}
+      currData.column = arr[i][0];
+      currData.value = arr[i][1];
+      newData.push(currData);
+    }
+    console.log(newData);
+
+    if (xVariable == "Year") {
+      newData.forEach((row)=>{
+        console.log(row);
+        if (row.column != 'NaN') {
+          var mod = 8 - Math.floor((2021-row.column)/5)
+          yearsData[mod].value = row.value + yearsData[mod].value;
+        }
+      })
+      newData = yearsData;
+    }
+    
+    
+    return newData;
+    
+  }
 
   // chart2 // or something else that selects the SVG element in your visualizations
   //   .append("g") // create a group node
