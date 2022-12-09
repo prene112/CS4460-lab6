@@ -2,12 +2,12 @@
 <html>
 	<head>
 		<meta charset="UTF-8"/> 
-		<title>Lab 6</title>
+		<title>Game Sales</title>
 		<link href="style.css" type="text/css" rel="stylesheet" />	 
    	</head>
    	<body>
 		<div style="text-align:center; font-size: 40px; margin-top: -20px;">
-			<p>Game Sales</p>
+			<p>Game Sales Comparison</p>
 		</div>
    		<br />
    		<br />
@@ -19,6 +19,7 @@
 				<option value="Publisher">Publisher</option>
 				<option value="Year">Year</option>
 			</select>
+
 			<label for="categorySelect">Y-Axis: </label>
 			<select class="custom-select" id="yCategorySelect">
 				<option selected value="Global_Sales">Global Sales</option>
@@ -27,6 +28,11 @@
 				<option value="JP_Sales">Japan Sales</option>
 				<option value="Other_Sales">Other Sales</option>
 			</select>
+
+			<form name="cutoff">
+				<label for="cutoffFilter" class="show">Sales Cutoff:</label>
+				<input type="text" id="cutoff">
+		  </form>
         </div>
 	   	<div id="wrapper">
 			<div id="chart1">
