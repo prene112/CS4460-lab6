@@ -6,6 +6,7 @@ var rangeX = [50, 470]
 var rangeY = [470, 30]
 
 d3.csv("videogamesales.csv", function (csv) {
+
   for (var i = 0; i < csv.length; ++i) {
     csv[i].Rank = Number(csv[i].Calories);
     csv[i].Year = Number(csv[i].Year);
@@ -103,6 +104,19 @@ d3.csv("videogamesales.csv", function (csv) {
     .attr("id", "svg1")
     .attr("width", width)
     .attr("height", height);
+  var extent;
+
+  $(document).ready(function(){
+    function hi(){
+      onXCategoryChanged()
+    }
+
+    $('#xCategorySelect').on( 'change', function(){ hi(); } );
+    var platformData = organizeData(platformExtent, "Platform", "NA_Sales");
+    updateAxes(platformData);
+    updateChart(platformData);
+    
+  });
 
   // var chart2 = d3
   //   .select("#chart2")
@@ -224,12 +238,13 @@ d3.csv("videogamesales.csv", function (csv) {
   //   .style("text-anchor", "end");
 
   function updateAxes(newData) {
-    var extent = d3.extent(newData, (row)=> {
+    //organizeData()
+    extent = d3.extent(newData, (row)=> {
       return row.value;
     })
     // Axis setup
     //var xScale = d3.scaleLinear().domain(platformExtent).range(rangeX);
-    var yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
+    yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
 
     console.log(extent);
 
@@ -237,7 +252,7 @@ d3.csv("videogamesales.csv", function (csv) {
     // var yScale2 = d3.scaleLinear().domain(proteinExtent).range([470, 30]);
 
     //var xAxis = d3.axisBottom().scale(xScale);
-    var yAxis = d3.axisLeft().scale(yScale);
+    yAxis = d3.axisLeft().scale(yScale);
 
     // var xAxis2 = d3.axisBottom().scale(xScale2);
     // var yAxis2 = d3.axisLeft().scale(yScale2);
@@ -251,19 +266,20 @@ d3.csv("videogamesales.csv", function (csv) {
       .attr("dy", ".71em")
       .style("text-anchor", "end");
 
-    return extent;
   };
+
+
 
   function onXCategoryChanged() {
     var select = d3.select('#xCategorySelect').node();
     var xVal = select.options[select.selectedIndex].value;
     // Update chart with the selected category of cereal
     var inputExtent;
-    if (category == "Platform") {
+    if (xVal == "Platform") {
       inputExtent = platformExtent;
-    } else if (category == "Publisher") {
-      inputExtent = publisherExtent;
-    } else if (category == "Year") {
+    } else if (xVal == "Publisher") {
+      inputExtent = publishersExtent;
+    } else if (xVal == "Year") {
       inputExtent = yearExtent;
     } else {
       inputExtent = genreExtent;
@@ -271,15 +287,19 @@ d3.csv("videogamesales.csv", function (csv) {
     updateChart(organizeData(inputExtent, xVal, "NA_Sales"));
   }
 
-  var platformData = organizeData(platformExtent, "Platform", "NA_Sales");
-  updateChart(platformData);
+  
   // var genreData = organizeData(genreExtent, "Genre");
   // var publisherData = organizeData(publishersExtent, "Publisher");
+
+  function highestExtent() {
+    d
+  }
 
   function updateChart(newData) {
     var actualHeight = rangeY[0]-rangeY[1]
     var actualWidth = rangeX[1]-rangeX[0]
-    var extent = updateAxes(newData);
+
+
 
     var newTitle = chart1.selectAll('.gClass').data(newData, function(d){
       return d.column;
