@@ -131,8 +131,7 @@ d3.csv("videogamesales.csv", function (csv) {
     .append("text")
     .attr("x", width/2)
     .attr("y", 12)
-    .attr("font-size", "12px")
-    .text("Fat vs Carb");
+    .attr("font-size", "12px");
 
   // var title2 = d3
   //   .select("#svg2")
