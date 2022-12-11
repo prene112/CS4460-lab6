@@ -11,34 +11,46 @@
 		</div>
    		<br />
    		<br />
-		<div>
-			<label for="categorySelect">X-Axis: </label>
-			<select class="custom-select" id="xCategorySelect">
-				<option selected value="Platform">Platform</option>
-				<option value="Genre">Genre</option>
-				<option value="Publisher">Publisher</option>
-				<option value="Year">Year</option>
-			</select>
 
-			<label for="categorySelect">Y-Axis: </label>
-			<select class="custom-select" id="yCategorySelect">
-				<option selected value="Global_Sales">Global Sales</option>
-				<option value="NA_Sales">NA Sales</option>
-				<option value="EU_Sales">EU Sales</option>
-				<option value="JP_Sales">Japan Sales</option>
-				<option value="Other_Sales">Other Sales</option>
-			</select>
-
-			<form name="cutoff">
-				<label for="cutoffFilter" class="show">Sales Cutoff:</label>
-				<input type="text" id="cutoff">
-		  </form>
-        </div>
 	   	<div id="wrapper">
-			<div id="chart1">
-	    	</div>
-		  	<div id="chart3">
-				Text
+			<div >
+				<label class="leftAlign" for="categorySelect">X-Axis: </label>
+				<select class="leftAlign" class="custom-select" id="xCategorySelect">
+					<option selected value="Platform">Platform</option>
+					<option value="Genre">Genre</option>
+					<option value="Publisher">Publisher</option>
+					<option value="Year">Year</option>
+				</select>
+				<label class="leftAlign" for="categorySelect">Y-Axis: </label>
+				<select class="leftAlign" class="custom-select" id="yCategorySelect">
+					<option selected value="Global_Sales">Global Sales</option>
+					<option value="NA_Sales">NA Sales</option>
+					<option value="EU_Sales">EU Sales</option>
+					<option value="JP_Sales">Japan Sales</option>
+					<option value="Other_Sales">Other Sales</option>
+				</select>
+				<div class="leftAlign" style="display: flex;">
+					<form  name="cutoff">
+						<label for="cutoffFilter" class="show">Sales Cutoff:</label>
+						<input type="text" id="cutoff" value="0">
+					</form>
+					<button id="cutoffButton1">Enter</button>
+				</div>
+				<label class="leftAlign" for="categorySelect">Ordering: </label>
+				<select class="custom-select" id="sortSelect">
+					<option selected value="lowToHigh">Low to High</option>
+					<option value="highToLow">High to Low</option>
+				</select>
+			</div>
+			<div id="chart1Wrapper">
+				<p id="chart1Title"></p>
+				<div id="chart1">
+				</div>
+				<div id="sideText1">
+					<b> Additional Info: </b>
+					<p id="columnName">Column Name: </p>
+					<p id="value">Value: </p>
+				</div>
 			</div>
 	   	</div>	
 	</body>

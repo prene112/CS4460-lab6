@@ -1,9 +1,12 @@
 
-var width = 600;
-var height = 600;
+var width = 550;
+var height = 650;
 
-var rangeX = [50, 470]
+var rangeX = [50, 500]
 var rangeY = [470, 30]
+
+var length = 0;
+var data;
 
 d3.csv("videogamesales.csv", function (csv) {
 
@@ -23,15 +26,18 @@ d3.csv("videogamesales.csv", function (csv) {
   let publishersExtent = [];
   let yearExtent = [];
   let yearsData = [];
-
+  
+  //creating data for any Sales for a specific year range
   var currYear = 1981;
   for (var i = 0; i < 8; i++) {
     var currData = {}
     currData.column = currYear + " - " + (currYear+4);
+    currYear += 5;
     currData.value = 0;
     yearsData.push(currData);
   }
   
+  //finds all the unique items from each xAxis variable
   csv.forEach((row) => {
     if(platformExtent.indexOf(row.Platform) === -1) {
       platformExtent.push(row.Platform);
@@ -52,71 +58,61 @@ d3.csv("videogamesales.csv", function (csv) {
       yearExtent.push(row.Year);
     }
   });
-  console.log(yearExtent);
-
-  var naExtent = d3.extent(csv, function (row) {
-    return row.NA_Sales;
-  });
-  var euExtent = d3.extent(csv, function (row) {
-    return row.EU_Sales;
-  });
-  var otherExtent = d3.extent(csv, function (row) {
-    return row.Other_Sales;
-  });
-  var globalExtent = d3.extent(csv, function (row) {
-    return row.Global_Sales;
-  });
 
 
   
 
   //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  
 
-  //Legend
-  //Hint: Append circrcles to each selection to represent the calorie level
-  d3.select("#LowCalorie")
-    .append('circle')
-    .style("stroke", "black")
-    .style("fill", 'yellow')
-    .attr("r", 5)
-    .attr("cx", 10)
-    .attr("cy", 6);
-  d3.select("#MedCalorie")
-    .append('circle')
-    .style("stroke", "black")
-    .style("fill", 'orange')
-    .attr("r", 5)
-    .attr("cx", 10)
-    .attr("cy", 6);
-  d3.select("#HighCalorie")
-    .append('circle')
-    .style("stroke", "black")
-    .style("fill", 'red')
-    .attr("r", 5)
-    .attr("cx", 10)
-    .attr("cy", 6);
-
-  //Create SVGs for charts
+  //Create SVGs for chart
   var chart1 = d3
     .select("#chart1")
     .append("svg:svg")
     .attr("id", "svg1")
     .attr("width", width)
     .attr("height", height);
-  var extent;
+
+
+  var extent = [0,500];
 
   $(document).ready(function(){
-    function hi(){
-      onXCategoryChanged()
-    }
 
-    $('#xCategorySelect').on( 'change', function(){ hi(); } );
-    var platformData = organizeData(platformExtent, "Platform", "NA_Sales");
+    $('#xCategorySelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
+    $('#yCategorySelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
+    $('#sortSelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
+    $("#cutoffButton1").on('click', function() {onCategoryChanged(retrieveCutoff(), retrieveSort())})
+
+
+    $('#chart1').mouseover(function(val){
+      console.log(val.clientX);
+      var i = Math.floor((val.clientX-50)/((rangeX[1] - rangeX[0])/data.length));
+      console.log(data[i]);
+      if (data[i].column == undefined) {
+        $('#columnName').text(function(){return "Column Name: "})
+        $('#value').text(function(){return "Value: "})
+      } else {
+        $('#columnName').text(function(){return "Column Name: " + data[i].column})
+        $('#value').text(function(){return "Value: " + data[i].value + " million"})
+      }
+      
+    });
+
+    var platformData = organizeData(platformExtent, "Platform", "Global_Sales");
     updateAxes(platformData);
     updateChart(platformData);
     
   });
+
+  function retrieveSort() {
+    var select = d3.select('#sortSelect').node();
+    var sortVal = select.options[select.selectedIndex].value;
+    return sortVal
+  }
+
+  function retrieveCutoff() {
+    var cutoffVal = $('#cutoff').val()
+    return cutoffVal;
+  }
 
   // var chart2 = d3
   //   .select("#chart2")
@@ -238,9 +234,6 @@ d3.csv("videogamesales.csv", function (csv) {
 
   function updateAxes(newData) {
     //organizeData()
-    extent = d3.extent(newData, (row)=> {
-      return row.value;
-    })
     // Axis setup
     //var xScale = d3.scaleLinear().domain(platformExtent).range(rangeX);
     yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
@@ -257,7 +250,7 @@ d3.csv("videogamesales.csv", function (csv) {
     // var yAxis2 = d3.axisLeft().scale(yScale2);
     chart1 // or something else that selects the SVG element in your visualizations
       .append("g") // create a group node
-      .attr("transform", "translate(50, 0)")
+      .attr("transform", "translate(75, 0)")
       .call(yAxis)
       .append("text")
       .attr("transform", "rotate(-90)")
@@ -269,9 +262,14 @@ d3.csv("videogamesales.csv", function (csv) {
 
 
 
-  function onXCategoryChanged() {
+  function onCategoryChanged(cutoff, sort) {
     var select = d3.select('#xCategorySelect').node();
     var xVal = select.options[select.selectedIndex].value;
+
+    var select1 = d3.select('#yCategorySelect').node();
+    var yVal = select1.options[select1.selectedIndex].value;
+
+    console.log(xVal);
     // Update chart with the selected category of cereal
     var inputExtent;
     if (xVal == "Platform") {
@@ -283,53 +281,82 @@ d3.csv("videogamesales.csv", function (csv) {
     } else {
       inputExtent = genreExtent;
     }
-    updateChart(organizeData(inputExtent, xVal, "NA_Sales"));
+
+
+    var result = organizeData(inputExtent, xVal, yVal);
+    //sorting and filtering occurs
+    console.log(sort);
+    var finalResult = result.filter((d)=> {return d.value >= cutoff})
+    if (sort == "lowToHigh") {
+      finalResult = finalResult.sort(function(a, b){return a.value-b.value});
+    } else {
+      finalResult = finalResult.sort(function(a, b){return b.value-a.value});
+    }
+    updateChart(finalResult);
   }
 
   
   // var genreData = organizeData(genreExtent, "Genre");
   // var publisherData = organizeData(publishersExtent, "Publisher");
-
+0
   function highestExtent() {
-    d
+
   }
 
   function updateChart(newData) {
     var actualHeight = rangeY[0]-rangeY[1]
     var actualWidth = rangeX[1]-rangeX[0]
 
-
+    length = newData.length;
 
     var newTitle = chart1.selectAll('.gClass').data(newData, function(d){
+      return d.column;
+    });
+
+    newTitle.remove();
+    newTitle = chart1.selectAll('.gClass').data(newData, function(d){
       return d.column;
     });
 
     var selection = newTitle.enter()
         .append('g')
         .attr('class', 'gClass');
-        
-    selection.merge(newTitle).attr('transform', function(d, index){
-        return "translate(" + (index* (actualWidth/newData.length) + 50)+ "," + (rangeY[0] - (d.value* (actualHeight/extent[1]))) + ")";
-    });
-    
-    
+
     selection.append('rect')
-        .attr('height', function (d) { return d.value* (actualHeight/extent[1]) })
-        .attr('width', function(){return actualHeight/newData.length - 10})
-        .attr('class', 'bar');
+      .attr('height', function (d) { 
+        var value = d.value < 500 ? d.value : 510;
+        return value* (actualHeight/extent[1]) 
+      })
+      .attr('width', function(){return actualWidth/newData.length - 10})
+      .attr('class', 'bar');
     
     selection.append('text')
       .attr('text-anchor', 'end')
-      .attr('transform',  function(d){return "translate(15," + ((d.value* (440/extent[1])) + 10) + ")"+"rotate(-45)"})
+      .attr('transform',  function(d){
+        var value = d.value < 500 ? d.value : 500;
+        return "translate(15," + ((value* (440/extent[1])) + 10) + ")"+"rotate(-45)"
+      })
       .text(function(d){
           return d.column;
       });
+        
+    selection.merge(newTitle).attr('transform', function(d, index){
+        var value = d.value < 500 ? d.value : 500;
+        console.log((rangeY[0] - (value * (actualHeight/extent[1]))))
+        return "translate(" + (index* (actualWidth/newData.length) + 75)+ "," + (rangeY[0] - (value * (actualHeight/extent[1]))) + ")";
+    });
+    
 
     newTitle.exit().remove();
+
   }
 
   // Returns columns with corresponding datapoints
   function organizeData(columnName, xVariable, yVariable) {
+    //changes axes and title of graph
+    d3.select("#chart1Title").text(xVariable + " vs " + yVariable + " (in Millions)"); 
+     
+    //organization of data begins
     var map = new Map();
     var newData = []
     columnName.forEach((column)=> {
@@ -340,7 +367,6 @@ d3.csv("videogamesales.csv", function (csv) {
     }) 
     const obj = Object.fromEntries(map);
     var arr = Object.entries(obj);
-    console.log(map)
     for(var i = 0; i < arr.length; i++) {
       var currData = {}
       currData.column = arr[i][0];
@@ -351,7 +377,6 @@ d3.csv("videogamesales.csv", function (csv) {
 
     if (xVariable == "Year") {
       newData.forEach((row)=>{
-        console.log(row);
         if (row.column != 'NaN') {
           var mod = 8 - Math.floor((2021-row.column)/5)
           yearsData[mod].value = row.value + yearsData[mod].value;
@@ -359,8 +384,8 @@ d3.csv("videogamesales.csv", function (csv) {
       })
       newData = yearsData;
     }
-    
-    
+    data = newData;
+
     return newData;
     
   }

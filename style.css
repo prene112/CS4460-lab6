@@ -21,11 +21,14 @@ path.domain {
 
 #wrapper {
 	clear:both;
+	margin: auto;
+	width: 55%;
+
 }
 #chart1 {
   float:left;
 }
-#chart2{
+#sideText1{
 	float:left;
 }
 #chart3 {
@@ -46,3 +49,18 @@ path.domain {
 .non_brushed {
 	fill: grey;
 }
+
+#chart1Title {
+	font-weight: bold;
+	font-size: 15px;
+	margin-top: 50px;
+	margin-left: 150px;
+}
+#cutoffButton1 {
+	float: left;
+}
+
+.leftAlign {
+	float: left;
+	margin-left: 15px;
+  }
