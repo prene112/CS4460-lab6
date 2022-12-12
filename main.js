@@ -187,6 +187,9 @@ d3.csv("videogamesales.csv", function (csv) {
     xLabel.text(xVal);
     yLabel.text(yVal + " (in millions of dollars)");
 
+    if (xVal == "Year") {
+      clearYearsData();
+    }
     var result = organizeData(inputExtent, xVal, yVal);
     //sorting and filtering occurs
     console.log(sort);
@@ -199,6 +202,13 @@ d3.csv("videogamesales.csv", function (csv) {
       finalResult = result;
     }
     updateChart(finalResult);
+  }
+
+  //sets all values to 0 in yearsData
+  function clearYearsData() {
+    yearsData.forEach((val)=>{
+      val.value = 0;
+    })
   }
 
   
@@ -292,6 +302,7 @@ d3.csv("videogamesales.csv", function (csv) {
     return newData;
     
   }
+
 
   // chart2 // or something else that selects the SVG element in your visualizations
   //   .append("g") // create a group node
