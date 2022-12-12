@@ -23,7 +23,6 @@ path.domain {
 	clear:both;
 	margin: auto;
 	width: 55%;
-
 }
 #chart1 {
   float:left;
@@ -59,8 +58,17 @@ path.domain {
 #cutoffButton1 {
 	float: left;
 }
-
+.bar{
+	fill:blue;
+}
 .leftAlign {
 	float: left;
 	margin-left: 15px;
   }
+
+#chart1>svg>.gClass:hover> rect {
+	fill: black;
+}
+#chart1>svg>.gClass:hover> text {
+	font-weight: bold;
+}

@@ -85,8 +85,8 @@ d3.csv("videogamesales.csv", function (csv) {
 
     $('#chart1').mouseover(function(val){
       console.log(val.clientX);
-      var i = Math.floor((val.clientX-50)/((rangeX[1] - rangeX[0])/data.length));
-      console.log(data[i]);
+      var i = Math.floor((val.clientX-250)/((rangeX[1] - rangeX[0])/data.length));
+      console.log(i);
       if (data[i].column == undefined) {
         $('#columnName').text(function(){return "Column Name: "})
         $('#value').text(function(){return "Value: "})
@@ -96,6 +96,10 @@ d3.csv("videogamesales.csv", function (csv) {
       }
       
     });
+
+    //change Axes names
+    xLabel.text("Platform");
+    yLabel.text("Global_Sales (in millions of dollars)");
 
     var platformData = organizeData(platformExtent, "Platform", "Global_Sales");
     updateAxes(platformData);
@@ -129,22 +133,35 @@ d3.csv("videogamesales.csv", function (csv) {
     .attr("y", 12)
     .attr("font-size", "12px");
 
+  //Labels for axes location
+  var yLabel = d3
+    .select("#svg1")
+    .append("text")
+    .attr("x", 10)
+    .attr("y", 250)
+    .attr("font-size", "14px")
+    .attr("text-anchor", "middle")
+    .attr("transform", "translate(-230,300)rotate(-90)")
+    .attr("font-weight", "bold")
+    .text("yAxis");
+
+  var xLabel = d3
+    .select("#svg1")
+    .append("text")
+    .attr("x", 275)
+    .attr("y", 625)
+    .attr("font-size", "14px")
+    .attr("text-anchor", "middle")
+    .attr("font-weight", "bold")
+    .text("xAxis");
   // var title2 = d3
   //   .select("#svg2")
   //   .append("text")
   //   .attr("x", width/2)
   //   .attr("y", 12)
   //   .attr("font-size", "12px")
-  //   .text("Fiber vs Protein");
-
-  //Labels for Axes
-    // var label1 = d3
-    // .select("#svg1")
-    // .append("text")
-    // .attr("x", width/2)
-    // .attr("y", height)
-    // .attr("font-size", "12px")
-    // .text("Fat");
+  //   .text("Fiber vs Protein")
+    
 
     // var label2 = d3
     // .select("#svg1")
@@ -282,6 +299,9 @@ d3.csv("videogamesales.csv", function (csv) {
       inputExtent = genreExtent;
     }
 
+    //change Axes names
+    xLabel.text(xVal);
+    yLabel.text(yVal + " (in millions of dollars)");
 
     var result = organizeData(inputExtent, xVal, yVal);
     //sorting and filtering occurs
@@ -292,6 +312,7 @@ d3.csv("videogamesales.csv", function (csv) {
     } else {
       finalResult = finalResult.sort(function(a, b){return b.value-a.value});
     }
+    data = finalResult;
     updateChart(finalResult);
   }
 
