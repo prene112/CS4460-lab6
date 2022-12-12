@@ -6,7 +6,6 @@ var rangeX = [50, 500]
 var rangeY = [470, 30]
 
 var length = 0;
-var data;
 
 d3.csv("videogamesales.csv", function (csv) {
 
@@ -83,19 +82,14 @@ d3.csv("videogamesales.csv", function (csv) {
     $("#cutoffButton1").on('click', function() {onCategoryChanged(retrieveCutoff(), retrieveSort())})
 
 
-    $('#chart1').mouseover(function(val){
-      console.log(val.clientX);
-      var i = Math.floor((val.clientX-250)/((rangeX[1] - rangeX[0])/data.length));
-      console.log(i);
-      if (data[i].column == undefined) {
-        $('#columnName').text(function(){return "Column Name: "})
-        $('#value').text(function(){return "Value: "})
-      } else {
-        $('#columnName').text(function(){return "Column Name: " + data[i].column})
-        $('#value').text(function(){return "Value: " + data[i].value + " million"})
-      }
-      
-    });
+    $('#chart1').mouseover(function(){
+      $('.gClass').mouseover(function(val) {
+        var hoverColumn = val.target.__data__;
+        $('#columnName').text(function(){return "Column Name: " + hoverColumn.column})
+        $('#value').text(function(){return "Value: " + hoverColumn.value.toFixed(2) + " million"})
+      });
+    })
+     
 
     //change Axes names
     xLabel.text("Platform");
@@ -117,13 +111,6 @@ d3.csv("videogamesales.csv", function (csv) {
     var cutoffVal = $('#cutoff').val()
     return cutoffVal;
   }
-
-  // var chart2 = d3
-  //   .select("#chart2")
-  //   .append("svg:svg")
-  //   .attr("id", "svg2")
-  //   .attr("width", width)
-  //   .attr("height", height);
 
   //Labels for Charts
   var title1 = d3
@@ -154,117 +141,14 @@ d3.csv("videogamesales.csv", function (csv) {
     .attr("text-anchor", "middle")
     .attr("font-weight", "bold")
     .text("xAxis");
-  // var title2 = d3
-  //   .select("#svg2")
-  //   .append("text")
-  //   .attr("x", width/2)
-  //   .attr("y", 12)
-  //   .attr("font-size", "12px")
-  //   .text("Fiber vs Protein")
-    
-
-    // var label2 = d3
-    // .select("#svg1")
-    // .append("text")
-    // .attr("x", -width/2)
-    // .attr("y", 20)
-    // .attr("font-size", "12px")
-    // .attr("text-anchor", "end")
-    // .attr("transform", "rotate(-90)")
-    // .text("Carb");
-
-    // var fiberLabel = d3
-    // .select("#svg2")
-    // .append("text")
-    // .attr("x", width/2)
-    // .attr("y", height)
-    // .attr("font-size", "12px")
-    // .text("Fiber");
-
-    // var proteinLabel = d3
-    // .select("#svg2")
-    // .append("text")
-    // .attr("x", -width/2)
-    // .attr("y", 20)
-    // .attr("font-size", "12px")
-    // .attr("text-anchor", "end")
-    // .attr("transform", "rotate(-90)")
-    // .text("Protein");
-
-  /******************************************
-		
-		Create Circles for Each Scatterplot
-
-	 ******************************************/
-  // var circles1 = d3.select('#svg1')
-  //   .selectAll('circle')
-  //   .data(csv)
-  //   .enter()
-  //   .append('circle')
-  //   .style("stroke", "black")
-  //   .attr('class', function(d){
-  //     if (d.Calories<=100) {
-  //       return 'yellow';
-  //     } else if (d.Calories> 100 && d.Calories<=130) {
-  //       return 'orange';
-  //     } else {
-  //       return 'red';
-  //     }
-  //   })
-  //   .attr("r", 5)
-  //   .attr("cx", function(d){
-  //     return xScale(d.Fat);
-  //   })
-  //   .attr("cy", function(d){return yScale(d.Carb)});
-
-  // var circles2 = d3.select('#svg2')
-  //   .selectAll('circle')
-  //   .data(csv)
-  //   .enter()
-  //   .append('circle')
-  //   .style("stroke", "black")
-  //   .attr('class', function(d){
-  //     if (d.Calories<=100) {
-  //       return 'yellow';
-  //     } else if (d.Calories> 100 && d.Calories<=130) {
-  //       return 'orange';
-  //     } else {
-  //       return 'red';
-  //     }
-  //   })
-  //   .attr("r", 5)
-  //   .attr("cx", function(d){
-  //     //return 10;
-  //     return xScale2(d.Fiber);
-  //   })
-  //   .attr("cy", function(d){return yScale2(d.Protein)});
-  
-  // chart1 // or something else that selects the SVG element in your visualizations
-  //   .append("g") // create a group node
-  //   .attr("transform", "translate(0," + (width - 30) + ")")
-  //   .call(xAxis) // call the axis generator
-  //   .append("text")
-  //   .attr("class", "label")
-  //   .attr("x", width - 16)
-  //   .attr("y", -6)
-  //   .style("text-anchor", "end");
+ 
 
   function updateAxes(newData) {
-    //organizeData()
-    // Axis setup
-    //var xScale = d3.scaleLinear().domain(platformExtent).range(rangeX);
+
     yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
 
-    console.log(extent);
-
-    // var xScale2 = d3.scaleLinear().domain(fiberExtent).range([50, 470]);
-    // var yScale2 = d3.scaleLinear().domain(proteinExtent).range([470, 30]);
-
-    //var xAxis = d3.axisBottom().scale(xScale);
     yAxis = d3.axisLeft().scale(yScale);
 
-    // var xAxis2 = d3.axisBottom().scale(xScale2);
-    // var yAxis2 = d3.axisLeft().scale(yScale2);
     chart1 // or something else that selects the SVG element in your visualizations
       .append("g") // create a group node
       .attr("transform", "translate(75, 0)")
@@ -309,17 +193,17 @@ d3.csv("videogamesales.csv", function (csv) {
     var finalResult = result.filter((d)=> {return d.value >= cutoff})
     if (sort == "lowToHigh") {
       finalResult = finalResult.sort(function(a, b){return a.value-b.value});
-    } else {
+    } else if (sort == "highToLow"){
       finalResult = finalResult.sort(function(a, b){return b.value-a.value});
+    } else {
+      finalResult = result;
     }
-    data = finalResult;
     updateChart(finalResult);
   }
 
   
   // var genreData = organizeData(genreExtent, "Genre");
   // var publisherData = organizeData(publishersExtent, "Publisher");
-0
   function highestExtent() {
 
   }
@@ -354,7 +238,7 @@ d3.csv("videogamesales.csv", function (csv) {
     selection.append('text')
       .attr('text-anchor', 'end')
       .attr('transform',  function(d){
-        var value = d.value < 500 ? d.value : 500;
+        var value = d.value < 500 ? d.value : 510;
         return "translate(15," + ((value* (440/extent[1])) + 10) + ")"+"rotate(-45)"
       })
       .text(function(d){
@@ -362,7 +246,7 @@ d3.csv("videogamesales.csv", function (csv) {
       });
         
     selection.merge(newTitle).attr('transform', function(d, index){
-        var value = d.value < 500 ? d.value : 500;
+        var value = d.value < 500 ? d.value : 510;
         console.log((rangeY[0] - (value * (actualHeight/extent[1]))))
         return "translate(" + (index* (actualWidth/newData.length) + 75)+ "," + (rangeY[0] - (value * (actualHeight/extent[1]))) + ")";
     });
@@ -394,7 +278,6 @@ d3.csv("videogamesales.csv", function (csv) {
       currData.value = arr[i][1];
       newData.push(currData);
     }
-    console.log(newData);
 
     if (xVariable == "Year") {
       newData.forEach((row)=>{
@@ -405,8 +288,7 @@ d3.csv("videogamesales.csv", function (csv) {
       })
       newData = yearsData;
     }
-    data = newData;
-
+    console.log(newData);
     return newData;
     
   }
