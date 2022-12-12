@@ -1,11 +1,13 @@
-
 var width = 550;
 var height = 650;
 
+//ranges of the chart
 var rangeX = [50, 500]
 var rangeY = [470, 30]
 
-var length = 0;
+//the range of the yAxis
+var extent = [0,500];
+
 
 d3.csv("videogamesales.csv", function (csv) {
 
@@ -19,7 +21,8 @@ d3.csv("videogamesales.csv", function (csv) {
     csv[i].Global_Sales = Number(csv[i].Global_Sales);
   }
 
-  // Functions used for scaling axes +++++++++++++++
+  // used to store unique values for each variable 
+  //(such as wii, xbox360, nes, etc. for Platform)
   let platformExtent = [];
   let genreExtent = [];
   let publishersExtent = [];
@@ -59,11 +62,7 @@ d3.csv("videogamesales.csv", function (csv) {
   });
 
 
-  
-
-  //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-  //Create SVGs for chart
+  //Create SVG for chart
   var chart1 = d3
     .select("#chart1")
     .append("svg:svg")
@@ -72,16 +71,13 @@ d3.csv("videogamesales.csv", function (csv) {
     .attr("height", height);
 
 
-  var extent = [0,500];
 
   $(document).ready(function(){
-
+    //runs the following functions when the axes,filters, or mouseover change
     $('#xCategorySelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
     $('#yCategorySelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
     $('#sortSelect').on( 'change', function(){ onCategoryChanged(retrieveCutoff(), retrieveSort()); } );
     $("#cutoffButton1").on('click', function() {onCategoryChanged(retrieveCutoff(), retrieveSort())})
-
-
     $('#chart1').mouseover(function(){
       $('.gClass').mouseover(function(val) {
         var hoverColumn = val.target.__data__;
@@ -90,13 +86,13 @@ d3.csv("videogamesales.csv", function (csv) {
       });
     })
      
-
+    /* All these changes below occur during startup */
     //change Axes names
     xLabel.text("Platform");
     yLabel.text("Global_Sales (in millions of dollars)");
 
     var platformData = organizeData(platformExtent, "Platform", "Global_Sales");
-    updateAxes(platformData);
+    updateAxes();
     updateChart(platformData);
     
   });
@@ -143,14 +139,15 @@ d3.csv("videogamesales.csv", function (csv) {
     .text("xAxis");
  
 
-  function updateAxes(newData) {
+  function updateAxes() {
 
     yScale = d3.scaleLinear().domain([0, extent[1]]).range(rangeY);
 
     yAxis = d3.axisLeft().scale(yScale);
 
-    chart1 // or something else that selects the SVG element in your visualizations
-      .append("g") // create a group node
+    //appending axis
+    chart1 
+      .append("g") 
       .attr("transform", "translate(75, 0)")
       .call(yAxis)
       .append("text")
@@ -170,7 +167,6 @@ d3.csv("videogamesales.csv", function (csv) {
     var select1 = d3.select('#yCategorySelect').node();
     var yVal = select1.options[select1.selectedIndex].value;
 
-    console.log(xVal);
     // Update chart with the selected category of cereal
     var inputExtent;
     if (xVal == "Platform") {
@@ -191,8 +187,8 @@ d3.csv("videogamesales.csv", function (csv) {
       clearYearsData();
     }
     var result = organizeData(inputExtent, xVal, yVal);
+
     //sorting and filtering occurs
-    console.log(sort);
     var finalResult = result.filter((d)=> {return d.value >= cutoff})
     if (sort == "lowToHigh") {
       finalResult = finalResult.sort(function(a, b){return a.value-b.value});
@@ -204,25 +200,17 @@ d3.csv("videogamesales.csv", function (csv) {
     updateChart(finalResult);
   }
 
-  //sets all values to 0 in yearsData
+  //sets all values to 0 in yearsData variable
   function clearYearsData() {
     yearsData.forEach((val)=>{
       val.value = 0;
     })
   }
 
-  
-  // var genreData = organizeData(genreExtent, "Genre");
-  // var publisherData = organizeData(publishersExtent, "Publisher");
-  function highestExtent() {
-
-  }
-
+  //updates chart with bars and text
   function updateChart(newData) {
     var actualHeight = rangeY[0]-rangeY[1]
     var actualWidth = rangeX[1]-rangeX[0]
-
-    length = newData.length;
 
     var newTitle = chart1.selectAll('.gClass').data(newData, function(d){
       return d.column;
@@ -239,7 +227,7 @@ d3.csv("videogamesales.csv", function (csv) {
 
     selection.append('rect')
       .attr('height', function (d) { 
-        var value = d.value < 500 ? d.value : 510;
+        var value = d.value < 500 ? d.value : 550;
         return value* (actualHeight/extent[1]) 
       })
       .attr('width', function(){return actualWidth/newData.length - 10})
@@ -248,7 +236,7 @@ d3.csv("videogamesales.csv", function (csv) {
     selection.append('text')
       .attr('text-anchor', 'end')
       .attr('transform',  function(d){
-        var value = d.value < 500 ? d.value : 510;
+        var value = d.value < 500 ? d.value : 550;
         return "translate(15," + ((value* (440/extent[1])) + 10) + ")"+"rotate(-45)"
       })
       .text(function(d){
@@ -256,7 +244,7 @@ d3.csv("videogamesales.csv", function (csv) {
       });
         
     selection.merge(newTitle).attr('transform', function(d, index){
-        var value = d.value < 500 ? d.value : 510;
+        var value = d.value < 500 ? d.value : 550;
         console.log((rangeY[0] - (value * (actualHeight/extent[1]))))
         return "translate(" + (index* (actualWidth/newData.length) + 75)+ "," + (rangeY[0] - (value * (actualHeight/extent[1]))) + ")";
     });
@@ -302,223 +290,4 @@ d3.csv("videogamesales.csv", function (csv) {
     return newData;
     
   }
-
-
-  // chart2 // or something else that selects the SVG element in your visualizations
-  //   .append("g") // create a group node
-  //   .attr("transform", "translate(0," + (width - 30) + ")")
-  //   .call(xAxis2)
-  //   .append("text")
-  //   .attr("class", "label")
-  //   .attr("x", width - 16)
-  //   .attr("y", -6)
-  //   .style("text-anchor", "end");
-
-  // chart2 // or something else that selects the SVG element in your visualizations
-  //   .append("g") // create a group node
-  //   .attr("transform", "translate(50, 0)")
-  //   .call(yAxis2)
-  //   .append("text")
-  //   .attr("class", "label")
-  //   .attr("transform", "rotate(-90)")
-  //   .attr("y", 6)
-  //   .attr("dy", ".71em")
-  //   .style("text-anchor", "end");
-  
-  // var g1 = d3.select("#svg1")
-  //   .append("g")
-  //   .attr("class", "brush")
-  //   .call(
-  //     d3.brush()
-  //       .extent([[50, 30], [470, 470]])
-  //       .on("start", brushstart)
-  //       .on("brush", highlightBrushedCircles)
-  //       .on("end", displayValues));
-  
-  // var g2 = d3.select("#svg2")
-  //   .append("g")
-  //   .attr("class", "brush")
-  //   .call(
-  //     d3.brush()
-  //       .extent([[50, 30], [470, 470]])
-  //       .on("start", brushstart2)
-  //       .on("brush", highlightBrushedCircles2)
-  //       .on("end", displayValues2));
-
-
-  // createPieChart(csv,);
-
-  
-  // function brushstart() {
-  //   d3.select("#svg1").selectAll("circle").attr("class", "non_brushed");
-  //   d3.select(".brush").call(brush.move, null); //using `.call()` to call the brush function on each elements
-  // }
-  
-  // function highlightBrushedCircles() {
-  
-  //     // Get the extent or bounding box of the brush event, this is a 2x2 array
-  //     var e = d3.event.selection;
-  //     if(e) {
-  //         //Revert circles to initial style
-  //         circles1.attr("class", "non_brushed");
-  //         circles2.attr("class", "non_brushed");
-  
-  //         //Select the instance of brush selection (access coordinates of the selection area)
-  //         var coords = d3.brushSelection(this);
-          
-  //         // Select all circles, and add the color gradient classes if the data for that circle
-  //         // lies outside of the brush-filter applied for this x and y attributes
-  //         var selectionData = [];
-  //         var selected1 = circles1.filter(function(val){
-  //           var currX = this.cx.animVal.value;
-  //           var currY = this.cy.animVal.value;
-  //           if ((currY >= coords[0][1] && currY <= coords[1][1]) && (currX >= coords[0][0] && currX <= coords[1][0])) {
-  //             return val;
-  //           }
-  //         })
-  //         selected1.attr('class', function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-  //         //console.log(selected1.data());
-  //         var selected2 = circles2.data(selected1.data(),function(d){return d.CerealName})
-  //         selected2.attr('class', function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             console.log(d.CerealName);
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-  //         handleOneCircle(selectionData)
-  //     }
-  // }
-  
-  // function displayValues() {
-  //     // If there is no longer an extent or bounding box then the brush has been removed
-  //     if(!d3.event.selection) {
-  //         // Bring back all non brushed circle elements to original color gradient
-  //         d3.selectAll(".non_brushed").attr("class", function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-  
-  //     }
-  //     // In Activity 3: Write the code to display tooltip only if one circle is selected in here
-      
-  // }
-
-  // function handleOneCircle(selectionData) {
-  //   if (selectionData.length == 1) {
-  //     populateInformation(selectionData);
-  //   } else {
-  //     emptyInformation();
-  //   }
-
-  // }
-
-  // function populateInformation(selectionData) {
-  //   d3.select("#cerealText").text('Cereal: ' + selectionData[0]['CerealName']);
-  //   d3.select("#caloriesText").text('Calories: ' + selectionData[0]['Calories']);
-  //   d3.select("#fatText").text('Fat: ' + selectionData[0]['Fat']);
-  //   d3.select("#carbText").text('Carb: ' + selectionData[0]['Carb']);
-  //   d3.select("#fiberText").text('Fiber: ' + selectionData[0]['Fiber']);
-  //   d3.select("#proteinText").text('Protein: ' + selectionData[0]['Protein']);
-  // }
-
-  // function emptyInformation() {
-  //   d3.select("#cerealText").text('Cereal: ');
-  //   d3.select("#caloriesText").text('Calories: ');
-  //   d3.select("#fatText").text('Fat: ');
-  //   d3.select("#carbText").text('Carb: ' );
-  //   d3.select("#fiberText").text('Fiber: ');
-  //   d3.select("#proteinText").text('Protein: ');
-  // }
-
-  // function brushstart2() {
-  //   d3.select("#svg2").selectAll("circle").attr("class", "non_brushed");
-  //   d3.select(".brush").call(brush.move, null); //using `.call()` to call the brush function on each elements
-  // }
-  
-  // function highlightBrushedCircles2() {
-  
-  //     // Get the extent or bounding box of the brush event, this is a 2x2 array
-  //     var e = d3.event.selection;
-  //     if(e) {
-          
-  //         //Revert circles to initial style
-  //         circles1.attr("class", "non_brushed");
-  //         circles2.attr("class", "non_brushed");
-  
-  //         //Select the instance of brush selection (access coordinates of the selection area)
-  //         var coords = d3.brushSelection(this);
-          
-  //         // Select all circles, and add the color gradient classes if the data for that circle
-  //         // lies outside of the brush-filter applied for this x and y attributes
-  //         var selectionData = [];
-  //         var selected1 = circles2.filter(function(val){
-  //           var currX = this.cx.animVal.value;
-  //           var currY = this.cy.animVal.value;
-  //           if ((currY >= coords[0][1] && currY <= coords[1][1]) && (currX >= coords[0][0] && currX <= coords[1][0])) {
-  //             selectionData.push(val);
-  //             return val;
-  //           }
-  //         })
-          
-  //         selected1.attr('class', function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-
-  //         var selected2 = circles1.data(selected1.data(),function(d){
-  //           return d.CerealName;
-  //         })
-  //         console.log(selected2.data());
-  //         selected2.attr('class', function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-  //         handleOneCircle(selectionData);
-  //     }
-  // }
-  
-  // function displayValues2() {
-  //     // If there is no longer an extent or bounding box then the brush has been removed
-  //     if(!d3.event.selection) {
-  //         // Bring back all non brushed circle elements to original color gradient
-  //         d3.selectAll(".non_brushed").attr("class", function(d){
-  //           if (d.Calories<=100) {
-  //             return 'yellow';
-  //           } else if (d.Calories> 100 && d.Calories<=130) {
-  //             return 'orange';
-  //           } else {
-  //             return 'red';
-  //           }
-  //         })
-  
-  //     }
-  //     // In Activity 3: Write the code to display tooltip only if one circle is selected in here.
-  // }
 });
